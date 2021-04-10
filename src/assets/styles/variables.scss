@@ -1,0 +1,24 @@
+//********************//
+//  Table of Content //
+//******************//
+/********************
+  1. Gradients 
+  2. Normal Colours
+  3. screen Breakpoints
+
+*******************/
+
+//Gradients
+$gradient1: 30deg, rgba(13, 237, 240, 1) 44%, rgba(106, 14, 240, 1) 91%;
+
+//Normal Colours//
+$colour1: rgb(13, 237, 240);
+$jobCardBgColour: #fff;
+$imgCardBgColour: #fff;
+
+//screen Breakpoints//
+$screenXs: 0; //extra small (eg hanndset)
+$screenSm: 600px; //small (eg tablet)
+$screenMd: 960px; // medium (eg laptop)
+$screenLg: 1264px; // Large (eg desktop)
+$screenXl: 1904px; // extra large (4k & ultra wides)

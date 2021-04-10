@@ -1,0 +1,75 @@
+//********************//
+//  Table of Content //
+//******************//
+/********************
+  1. Gradients 
+  2. Animations
+  3. Grid
+  4. Flex
+  5. Media Queries 
+  6. dot . 
+*******************/
+
+// 1. Gradients //
+@mixin linearGradient($gradient, $default) {
+  background-image: $default;
+  background-image: -moz-linear-gradient($gradient);
+  background-image: -webkit-linear-gradient($gradient);
+  background-image: linear-gradient($gradient);
+}
+
+// 2. Animations //
+@keyframes bg-animation {
+  0% {
+    background-position: left;
+  }
+  100% {
+    background-position: right;
+  }
+}
+@keyframes fullSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+// 3. Grid //
+@mixin grid($cols-template, $col-gap, $row-gap, $justify-items) {
+  display: grid;
+  justify-items: $justify-items;
+  grid-template-columns: $cols-template;
+  grid-column-gap: $col-gap;
+  grid-row-gap: $row-gap;
+}
+
+// 6. Flex //
+@mixin flex($flex-direction, $justify-content) {
+  display: flex;
+  flex-direction: flex-direction;
+  justify-content: $justify-content;
+}
+
+// 5. Media Queries //
+@mixin mediaQueries($arg...) {
+  @if length($arg) == 1 {
+    @media screen and (max-width: nth($arg, 1)) {
+      @content;
+    }
+  }
+  @if length($arg) == 2 {
+    @media screen and (max-width: nth($arg,1)) and (min-width: nth($arg,2)) {
+      @content;
+    }
+  }
+}
+// 6. dot · //
+@mixin dot {
+  margin: 6px 8px 0 8px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: #93939a;
+}
