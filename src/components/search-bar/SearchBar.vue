@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import { mapActions } from "vuex";
+import { mapActions, mapMutations, mapGetters } from "vuex";
 export default {
   components: {
     SearchIcon: () => import("@/components/icons/SearchIcon"),
@@ -42,8 +42,8 @@ export default {
   },
   data: () => ({
     inputs: {
-      description: null,
-      location: null,
+      description: "",
+      location: "",
       fulltime: false,
     },
     window: {
@@ -52,21 +52,49 @@ export default {
     },
   }),
   computed: {
+    ...mapGetters(["getJobList"]),
     isOnScreenSm() {
       return this.window.width <= 600;
     },
   },
   methods: {
-    ...mapActions(["fetchJobs"]),
+    ...mapActions(["fetchJobs", "resetJobLimit"]),
+    ...mapMutations(["setJobList","setIsLoading"]),
     search() {
-      const inputs = this.inputs;
-      if (
-        inputs.description !== null ||
-        inputs.location !== null ||
-        inputs.fulltime
-      ) {
-        this.fetchJobs(inputs);
-      }
+      this.setIsLoading(true);
+      const description = this.inputs.description.trim();
+      const location = this.inputs.location.trim();
+      const fulltime = this.inputs.fulltime;
+
+      setTimeout(() => {
+        if(description !== "" || location !== "" || fulltime){
+          let jobList;
+          if(description !== ""){
+            const regex = new RegExp(`${description}`,"g");
+            jobList = this.getJobList
+                          .filter(
+                            job => regex.test(job.title) || 
+                                  regex.test(job.description) ||
+                                  regex.test(job.company_name)
+                          );
+          }
+          if(location !== ""){
+            const regex = new RegExp(`${location}`,"g");
+            jobList = this.getJobList
+                          .filter(
+                            job => regex.test(job.candidate_required_location)
+                          );
+          }
+          if(fulltime) 
+            jobList = this.getJobList.filter(job => job.job_type === "full_time");
+
+          this.setJobList(jobList);
+        }else{
+          this.fetchJobs();
+        }
+        this.resetJobLimit();
+        this.setIsLoading(false);
+      }, 1000);
     },
     handleWindowResize() {
       this.window.width = window.innerWidth;

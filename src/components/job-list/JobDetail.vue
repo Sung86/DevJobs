@@ -3,21 +3,22 @@
     <div :class="$style.container">
       <!-- Head -->
       <div :class="$style.head">
-        <div v-if="job.company_logo" :class="$style['logo-container']">
-          <img :src="job.company_logo" :class="$style.logo" />
+        <div :class="$style['logo-container']">
+          <img v-if="job.company_logo_url" :src="job.company_logo_url" :class="$style.logo" />
+          <img v-else src='https://afmec.org/images/no-image-available-icon.jpg' :class="$style.logo" />
         </div>
         <div :class="$style['company-info']">
-          <p :class="$style.company">{{ job.company }}</p>
+          <p :class="$style.company">{{ job.company_name }}</p>
           <a
             :class="$style['company-url']"
-            :href="job.company_url"
+            :href="job.url"
             target="_blank"
-            >{{ job.company_url }}</a
+            >{{ job.url }}</a
           >
         </div>
         <div
           :class="$style['company-site-btn']"
-          @click="goToLink(job.company_url)"
+          @click="goToLink(job.url)"
         >
           <Button
             :label="`Company Site`"
@@ -33,28 +34,29 @@
             <div :class="$style.gray">
               {{ jobAge + " ago" }}
               <span :class="$style.dot" />
-              {{ job.type }}
+              {{ job.job_type }}
+              <div v-if="job.salary">
+                <span :class="$style.dot" />
+                {{job.salary}}
+              </div>
             </div>
             <h1>{{ job.title }}</h1>
             <p :class="$style.gray">{{ job.location }}</p>
           </div>
-          <div :class="$style['apply-now-btn']">
-            <a href="#job-how-to-apply">
-              <Button
-                :label="`Apply Now`"
-                :labelColour="`#fff`"
-                :btnColour="`#5a52ff`"
-              />
-            </a>
+          <div :class="$style['apply-now-btn']" @click="goToLink(job.url)">
+            <Button
+              :label="`Apply Now`"
+              :labelColour="`#fff`"
+              :btnColour="`#5a52ff`"
+            />
           </div>
         </div>
         <div v-html="job.description" :class="$style.description"></div>
       </div>
       <!-- Leg -->
-      <div id="job-how-to-apply" :class="$style.leg">
+      <div :class="$style.leg">
         <div>
-          <b>How to Apply</b>
-          <p v-html="job.how_to_apply"></p>
+          <a :href="job.url" target="_blank">Click here to apply</a>
         </div>
       </div>
     </div>
@@ -64,14 +66,12 @@
         <p :class="$style['job-title']">{{ job.title }}</p>
         <p :class="$style['job-company']">{{ job.company }}</p>
       </div>
-      <div :class="$style['apply-now-btn']" @click="goToLink(job.company_url)">
-        <a href="#job-how-to-apply">
-          <Button
-            :label="`Apply Now`"
-            :labelColour="`#fff`"
-            :btnColour="`#5a52ff`"
-          />
-        </a>
+      <div :class="$style['apply-now-btn']" @click="goToLink(job.url)">
+        <Button
+          :label="`Apply Now`"
+          :labelColour="`#fff`"
+          :btnColour="`#5a52ff`"
+        />
       </div>
     </div>
   </div>
@@ -83,7 +83,7 @@ export default {
   props: ["job"],
   async created() {
     this.jobAge = await this.calculateJobAge({
-      jobCreatedAt: this.job.created_at,
+      jobCreatedAt: this.job.publication_date,
     });
   },
   components: {
@@ -126,7 +126,7 @@ export default {
     }
 
     .logo-container {
-      height: 110px;
+      height: 100%;
       width: 200px;
       border-radius: 10px 0 0 10px;
       background: $imgCardBgColour;
@@ -176,6 +176,7 @@ export default {
       padding: 40px 0 0 40px;
       .brief {
         .gray {
+          @include flex(row, none);
           color: gray;
         }
         div > .dot {
@@ -185,9 +186,6 @@ export default {
         }
       }
       .apply-now-btn {
-        a {
-          text-decoration: none;
-        }
         @include mediaQueries($screenSm) {
           width: 87%;
         }
@@ -203,8 +201,10 @@ export default {
     background: #5a52ff;
     margin: 0 0 20px 0;
     div {
-      color: #fff;
       padding: 40px;
+      a{
+        color: #fff;
+      }
     }
   }
 }
@@ -213,7 +213,8 @@ export default {
   background: $jobCardBgColour;
   position: static;
   bottom: 0;
-  @include grid(2fr 1fr, 0, 0, space-between);
+  padding-bottom: 20px;
+  @include grid(5fr 1fr, 0, 0, space-between);
   @include mediaQueries($screenSm) {
     padding: 0 0 20px 5px;
     @include grid(1fr, 0, 0, center);
@@ -233,9 +234,6 @@ export default {
     }
   }
   .apply-now-btn {
-    a {
-      text-decoration: none;
-    }
     @include mediaQueries($screenSm) {
       width: 83%;
     }

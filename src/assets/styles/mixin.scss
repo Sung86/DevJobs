@@ -45,7 +45,7 @@
   grid-row-gap: $row-gap;
 }
 
-// 6. Flex //
+// 4. Flex //
 @mixin flex($flex-direction, $justify-content) {
   display: flex;
   flex-direction: flex-direction;

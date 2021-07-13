@@ -1,16 +1,19 @@
 <template>
   <div :class="$style.container">
-    <div v-if="job.company_logo" :class="$style['logo-container']">
-      <img :src="job.company_logo" :class="$style.logo" />
+    <div :class="$style['logo-container']">
+      <img v-if="job.company_logo_url" :src="job.company_logo_url" :class="$style.logo" />
+      <img v-else src='https://afmec.org/images/no-image-available-icon.jpg' :class="$style.logo" />
     </div>
     <div :class="[$style.flex]">
       {{ jobAge + " ago" }}
       <span :class="$style.dot" />
-      {{ job.type }}
+      {{ job.job_type }}
     </div>
     <p :class="$style['title']">{{ job.title }}</p>
-    <p :class="$style['company']">{{ job.company }}</p>
-    <p :class="$style['location']">{{ job.location }}</p>
+    <p :class="$style['company']">{{ job.company_name }}</p>
+    <p :class="$style['location']">{{ job.candidate_required_location }}</p>
+    <p :class="$style['salary']">{{ job.salary }}</p>
+    
   </div>
 </template>
 
@@ -23,7 +26,7 @@ export default {
   }),
   async created() {
     this.jobAge = await this.calculateJobAge({
-      jobCreatedAt: this.job.created_at,
+      jobCreatedAt: this.job.publication_date,
     });
   },
   methods: {
@@ -48,7 +51,7 @@ export default {
     width: 90px;
     height: 60px;
     transform: translateY(-150%);
-    .logo {
+    .logo{
       border-radius: 25px;
       width: 100%;
       height: 100%;
@@ -72,6 +75,10 @@ export default {
   .location {
     font-weight: bold;
     color: #5a5ae1;
+  }
+  .salary{
+    font-size: 0.8rem;
+    color:#313131;
   }
 }
 </style>

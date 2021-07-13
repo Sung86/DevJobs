@@ -1,9 +1,10 @@
 <template>
-  <div v-if="jobsToBeDisplayed" :class="$style.container">
-    <div :class="$style['jobs-container']">
+  <div v-if="jobList && !getIsLoading" :class="$style.container">
+    <div v-if="jobList.length > 0">
+      <div :class="$style['jobs-container']">
       <div
-        v-for="(job, i) in jobsToBeDisplayed"
-        :key="`job-${job.id}`"
+        v-for="(job, i) in jobList.slice(0,getJobLimit)"
+        :key="`${job.id}`"
         :class="$style['job-container']"
         @click="routeToJobDetailView(i)"
       >
@@ -13,7 +14,7 @@
     <div
       :class="$style['load-more-btn']"
       @click="loadMoreJobs()"
-      v-if="getJobList !== null"
+      v-if="jobList !== null || jobList.length > 0"
     >
       <Button
         :label="`Load More`"
@@ -21,24 +22,30 @@
         :btnColour="`#5a52ff`"
       />
     </div>
+    </div>
+    <div v-else>
+      <center>
+        <span :class="$style['no-result-msg']">No Jobs Found</span>
+      </center>
+    </div>
   </div>
-  <div v-else :class="$style.loading">
+  
+  <div v-else-if="getIsLoading" :class="$style.loading">
     <Loading />
   </div>
 </template>
 
 <script>
-import { mapActions, mapGetters } from "vuex";
+import { mapActions, mapGetters, mapMutations } from "vuex";
 export default {
   data: () => ({
-    jobsToBeDisplayed: null,
     jobList: null,
-    filteredJobList: null,
-    lastJobIndex: 0,
-    jobPage: 1,
   }),
   async created() {
-    await this.fetchJobs({ page: this.jobPage });
+    this.setIsLoading(true);
+    if(this.jobList === null || this.jobList.length <= 0) 
+      await this.fetchJobs();
+    this.setIsLoading(false); 
   },
   components: {
     Job: () => import("./Job"),
@@ -46,50 +53,27 @@ export default {
     Loading: () => import("@/components/layouts/Loading"),
   },
   computed: {
-    ...mapGetters(["getJobList", "getFilteredJobList"]),
+    ...mapGetters([
+      "getJobList",
+      "getJobLimit",
+      "getIsLoading"
+    ]),
   },
   watch: {
-    getFilteredJobList(newVal) {
-      this.resetJobList();
-      if (newVal != null) {
-        localStorage.setItem("jobs", JSON.stringify(newVal));
-        this.jobsToBeDisplayed = null;
-        setTimeout(() => {
-          this.jobsToBeDisplayed = JSON.parse(localStorage.getItem("jobs"));
-        }, 2000);
-      }
-    },
     getJobList(newVal) {
       if (newVal != null) {
         localStorage.setItem("jobs", JSON.stringify(newVal));
         this.jobList = JSON.parse(localStorage.getItem("jobs"));
-        this.jobsToBeDisplayed = null;
-        setTimeout(() => {
-          this.jobsToBeDisplayed = this.jobList.slice(
-            this.lastJobIndex,
-            (this.lastJobIndex += 12)
-          );
-        }, 2000);
       }
     },
   },
   methods: {
     ...mapActions(["fetchJobs"]),
-    resetJobList() {
-      this.jobPage = 0;
-      this.lastJobIndex = 0;
-    },
+    ...mapMutations(["setJobLimit", "setIsLoading"]),
+  
     async loadMoreJobs() {
-      if (this.lastJobIndex + 12 + 1 >= this.jobList.length) {
-        this.jobPage++;
-        await this.fetchJobs({ page: this.jobPage });
-        this.jobList = [...this.getJobList];
-      }
-
-      this.jobsToBeDisplayed = [
-        ...this.jobsToBeDisplayed,
-        ...this.jobList.slice(this.lastJobIndex, (this.lastJobIndex += 12)),
-      ];
+      const jobLimit = this.getJobLimit + 9;
+      this.setJobLimit(jobLimit);
     },
     routeToJobDetailView(index) {
       this.$router.push({ name: "JobDetail", params: { i: index } });
@@ -102,6 +86,7 @@ export default {
 @import "@/assets/styles/variables.scss";
 @import "@/assets/styles/mixin.scss";
 .container {
+  margin-bottom: 10rem;
   .jobs-container {
     margin: 0 0 100px 0;
     @include grid(repeat(3, 1fr), 40px, 60px, center);
@@ -126,6 +111,9 @@ export default {
   .load-more-btn {
     width: 65%;
     margin: 30px 13%;
+  }
+  .no-result-msg{
+    color:red;
   }
 }
 .loading {
