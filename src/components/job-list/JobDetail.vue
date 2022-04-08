@@ -86,6 +86,7 @@ import { mapActions } from 'vuex';
 export default {
 	props: ['job'],
 	async created() {
+		this.job.description = this.job.description.replace(/<img[^>]*>/g, '');
 		this.jobAge = await this.calculateJobAge({
 			jobCreatedAt: this.job.publication_date,
 		});
